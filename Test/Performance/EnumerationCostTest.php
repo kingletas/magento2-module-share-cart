@@ -18,7 +18,7 @@ use Commerce\ShareCart\Controller\Cart\Share;
 use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\Validator\TokenFormatValidator;
-use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
+use Commerce\ShareCart\Test\Support\SnapshotQuote;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\RequestInterface;

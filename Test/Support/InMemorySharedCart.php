@@ -5,7 +5,7 @@
  */
 declare(strict_types=1);
 
-namespace Commerce\ShareCart\Test\Unit\Fake;
+namespace Commerce\ShareCart\Test\Support;
 
 use Commerce\ShareCart\Api\Data\SharedCartInterface;
 

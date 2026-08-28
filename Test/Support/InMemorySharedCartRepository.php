@@ -8,7 +8,7 @@
  */
 declare(strict_types=1);
 
-namespace Commerce\ShareCart\Test\Behaviour\Fake;
+namespace Commerce\ShareCart\Test\Support;
 
 use Commerce\Foundation\Api\TokenGeneratorInterface;
 use Commerce\ShareCart\Api\Data\SharedCartInterface;
