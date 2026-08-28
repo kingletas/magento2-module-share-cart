@@ -159,6 +159,9 @@ class ShareLinkIssuer
             return null;
         }
 
-        return $this->dateTime->gmtDate('Y-m-d H:i:s', strtotime(sprintf('+%d days', $days)));
+        return $this->dateTime->gmtDate(
+            'Y-m-d H:i:s',
+            strtotime(sprintf('+%d days', $days), $this->dateTime->gmtTimestamp())
+        );
     }
 }

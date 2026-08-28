@@ -258,9 +258,10 @@ final class SharedCartJourneyTest extends TestCase
         );
 
         $dateTime = $this->createMock(DateTime::class);
+        $dateTime->method('gmtTimestamp')->willReturn(strtotime(self::NOW));
         $dateTime->method('gmtDate')->willReturnCallback(
             static fn (string $format = 'Y-m-d H:i:s', $input = null): string =>
-                $input === null ? self::NOW : date($format, (int) $input)
+                $input === null ? self::NOW : gmdate($format, (int) $input)
         );
 
         return new ShareLinkIssuer(
