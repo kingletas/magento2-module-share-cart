@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="commerce_shared_cart" resource="default" engine="innodb" comment="Shared Carts">
+        <column xsi:type="int" name="shared_cart_id" padding="10" unsigned="true"
+                nullable="false" identity="true" comment="Shared Cart ID"/>
+        <column xsi:type="smallint" name="store_id" padding="5" unsigned="true"
+                nullable="false" comment="Store ID"/>
+        <column xsi:type="int" name="quote_id" padding="10" unsigned="true"
+                nullable="false" comment="Snapshot Quote ID"/>
+        <!--
+            Holds the SHA-256 digest of the share token: 64 hex characters,
+            sized to fit the unique index.
+        -->
+        <column xsi:type="varchar" name="token" nullable="false" length="64"
+                comment="SHA-256 digest of the share token"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Created At"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false"
+                default="CURRENT_TIMESTAMP" comment="Updated At"/>
+        <column xsi:type="timestamp" name="expires_at" on_update="false" nullable="true"
+                comment="Expires At; NULL never expires"/>
+
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="shared_cart_id"/>
+        </constraint>
+
+        <!-- Unique, not merely indexed. -->
+        <constraint xsi:type="unique" referenceId="COMMERCE_SHARED_CART_TOKEN">
+            <column name="token"/>
+        </constraint>
+
+        <constraint xsi:type="foreign" referenceId="COMMERCE_SHARED_CART_QUOTE_ID_QUOTE_ENTITY_ID"
+                    table="commerce_shared_cart" column="quote_id"
+                    referenceTable="quote" referenceColumn="entity_id" onDelete="CASCADE"/>
+
+        <!-- Supports the expiry sweep without scanning the table. -->
+        <index referenceId="COMMERCE_SHARED_CART_EXPIRES_AT" indexType="btree">
+            <column name="expires_at"/>
+        </index>
+    </table>
+</schema>

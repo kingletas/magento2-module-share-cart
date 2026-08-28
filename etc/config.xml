@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <commerce_sharecart>
+            <general>
+                <enabled>1</enabled>
+                <!-- Days a share link remains usable; 0 disables expiry. -->
+                <lifetime_days>30</lifetime_days>
+                <cleanup_enabled>1</cleanup_enabled>
+            </general>
+        </commerce_sharecart>
+    </default>
+</config>

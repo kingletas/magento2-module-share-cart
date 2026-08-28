@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <preference for="Commerce\ShareCart\Api\Data\SharedCartInterface"
+                type="Commerce\ShareCart\Model\SharedCart"/>
+    <preference for="Commerce\ShareCart\Api\SharedCartRepositoryInterface"
+                type="Commerce\ShareCart\Model\Repository\SharedCartRepository"/>
+    <preference for="Commerce\ShareCart\Api\Data\SharedCartSearchResultsInterface"
+                type="Commerce\ShareCart\Model\Repository\SharedCartSearchResults"/>
+
+    <!-- Config section id lives here, not in a class constant. -->
+    <type name="Commerce\ShareCart\Model\Config">
+        <arguments>
+            <argument name="section" xsi:type="string">commerce_sharecart</argument>
+        </arguments>
+    </type>
+
+    <!-- Express-checkout buttons. -->
+    <type name="Commerce\ShareCart\Model\Checkout\ExpressButtonPool">
+        <arguments>
+            <argument name="buttons" xsi:type="array"/>
+        </arguments>
+    </type>
+
+    <!--
+        Proxies on the checkout session, which starts a session on
+        construction.
+    -->
+    <type name="Commerce\ShareCart\Model\ShareLinkIssuer">
+        <arguments>
+            <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
+            <argument name="logger" xsi:type="object">Commerce\ShareCart\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Commerce\ShareCart\Model\Cart\SharedCartRestorer">
+        <arguments>
+            <argument name="checkoutSession" xsi:type="object">Magento\Checkout\Model\Session\Proxy</argument>
+            <argument name="logger" xsi:type="object">Commerce\ShareCart\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Commerce\ShareCart\Cron\PurgeExpiredSharedCarts">
+        <arguments>
+            <argument name="logger" xsi:type="object">Commerce\ShareCart\Logger</argument>
+        </arguments>
+    </type>
+    <type name="Commerce\ShareCart\Model\Checkout\ExpressButtonPool">
+        <arguments>
+            <argument name="logger" xsi:type="object">Commerce\ShareCart\Logger</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="Commerce\ShareCart\Logger\Handler" type="Commerce\Logger\Handler">
+        <arguments>
+            <argument name="fileName" xsi:type="string">share_cart.log</argument>
+            <argument name="subDirectory" xsi:type="string">commerce</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Commerce\ShareCart\Logger" type="Commerce\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">commerce_sharecart</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Commerce\ShareCart\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+</config>

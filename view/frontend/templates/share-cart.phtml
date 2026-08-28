@@ -1,0 +1,71 @@
+<?php
+/**
+ * share-cart.phtml
+ *
+ * @var \Magento\Framework\View\Element\Template $block
+ * @var \Magento\Framework\Escaper $escaper
+ * @var \Commerce\ShareCart\ViewModel\ShareCartButton $viewModel
+ *
+ * @package     Commerce_ShareCart
+ * @copyright   Copyright (c) the Commerce modules authors
+ * @license     OSL-3.0 https://opensource.org/licenses/OSL-3.0
+ */
+declare(strict_types=1);
+
+$viewModel = $block->getData('view_model');
+
+if ($viewModel === null || !$viewModel->isEnabled()) {
+    return;
+}
+$mageInit = json_encode(['shareCart' => json_decode($viewModel->getJsonConfig(), true)]);
+?>
+<div class="share-cart"
+     data-share-cart="root"
+     data-mage-init='<?= /* @noEscape */ $mageInit ?>'>
+
+    <button type="button" class="action share-cart-trigger" data-share-cart="trigger">
+        <span><?= $escaper->escapeHtml(__('Share My Cart')) ?></span>
+    </button>
+
+    <div class="share-cart-modal-content" data-share-cart="modal" style="display: none;">
+        <p class="share-cart-intro">
+            <?= $escaper->escapeHtml(
+                __('Ordering with a group, or want to show a friend what you picked? Generate a link below.')
+            ) ?>
+        </p>
+
+        <p class="share-cart-error message error" data-share-cart="error" style="display: none;"></p>
+
+        <button type="button" class="action primary" data-share-cart="generate">
+            <span><?= $escaper->escapeHtml(__('Generate Link')) ?></span>
+        </button>
+
+        <label class="share-cart-url-label" for="share-cart-url">
+            <?= $escaper->escapeHtml(__('Shareable link')) ?>
+        </label>
+        <input id="share-cart-url"
+               type="text"
+               class="input-text share-cart-url"
+               data-share-cart="url"
+               readonly
+               aria-readonly="true"
+               value="">
+
+        <button type="button" class="action secondary" data-share-cart="copy" style="display: none;">
+            <span><?= $escaper->escapeHtml(__('Copy Link')) ?></span>
+        </button>
+    </div>
+
+    <?php $expressButtons = $viewModel->getExpressButtons(); ?>
+    <?php if ($expressButtons !== []): ?>
+        <div class="share-cart-express-buttons">
+            <?php foreach ($expressButtons as $expressButton): ?>
+                <div class="share-cart-express-button share-cart-express-button--<?=
+                    $escaper->escapeHtmlAttr($expressButton->getCode())
+                ?>">
+                    <?= /* @noEscape */ $expressButton->render() ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+</div>

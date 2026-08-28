@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="commerce_sharecart" translate="label" type="text" sortOrder="400"
+                 showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Share Cart</label>
+            <tab>sales</tab>
+            <resource>Commerce_ShareCart::config</resource>
+            <group id="general" translate="label" type="text" sortOrder="10"
+                   showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+                <field id="enabled" translate="label comment" type="select" sortOrder="10"
+                       showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Enable Cart Sharing</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Lets shoppers generate a link that recreates their cart for someone else.</comment>
+                </field>
+                <field id="lifetime_days" translate="label comment" type="text" sortOrder="20"
+                       showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <label>Link Lifetime (days)</label>
+                    <validate>validate-digits validate-zero-or-greater</validate>
+                    <comment><![CDATA[How long a share link stays usable. A link reveals the contents of a
+                        shopper's basket to anyone holding it, so an expiry is recommended.
+                        Set to <strong>0</strong> for links that never expire.]]></comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+                <field id="cleanup_enabled" translate="label comment" type="select" sortOrder="30"
+                       showInDefault="1" showInStore="0" showInWebsite="0" canRestore="1">
+                    <label>Delete Expired Links by Cron</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <comment>Runs nightly. Without this the table grows for the life of the store.</comment>
+                    <depends><field id="enabled">1</field></depends>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

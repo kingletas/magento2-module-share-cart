@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+    /** * acl.xml * * @package Commerce_ShareCart * @copyright Copyright (c)
+    the Commerce modules authors */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Commerce_ShareCart::config" title="Share Cart Section" translate="title" sortOrder="400"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>
