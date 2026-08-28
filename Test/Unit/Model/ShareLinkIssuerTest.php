@@ -14,7 +14,6 @@ use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\ShareLinkIssuer;
 use Commerce\ShareCart\Test\Unit\Fake\InMemorySharedCart;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -25,7 +24,9 @@ use Magento\Quote\Api\Data\CartInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 /**
@@ -34,7 +35,7 @@ use RuntimeException;
  */
 class ShareLinkIssuerTest extends TestCase
 {
-    private RecordingLogger $logger;
+    private LoggerInterface&MockObject $logger;
     private int $tokenCalls = 0;
 
     /** @var Quote[] */
@@ -42,7 +43,7 @@ class ShareLinkIssuerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->logger = new RecordingLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->tokenCalls = 0;
         $this->savedQuotes = [];
     }
@@ -56,11 +57,14 @@ class ShareLinkIssuerTest extends TestCase
         $this->assertNull($link->token);
     }
 
+    /**
+     * An empty cart is a shopper action, not a fault.
+     */
     public function testAnEmptyCartIsNotLoggedAsAnError(): void
     {
-        $this->issuer(itemsCount: 0)->issue();
+        $this->logger->expects($this->never())->method('error');
 
-        $this->assertSame([], $this->logger->errors, 'An empty cart is a shopper action, not a fault.');
+        $this->issuer(itemsCount: 0)->issue();
     }
 
     public function testASuccessfulIssueReturnsATokenAndAUrl(): void
@@ -100,10 +104,14 @@ class ShareLinkIssuerTest extends TestCase
 
     public function testTheInternalReasonReachesTheLogEvenThoughTheShopperNeverSeesIt(): void
     {
-        $this->issuer(tokenAlwaysTaken: true)->issue();
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->anything(),
+                $this->callback(static fn (array $context): bool => array_key_exists('exception', $context))
+            );
 
-        $this->assertCount(1, $this->logger->errors);
-        $this->assertArrayHasKey('exception', $this->logger->errors[0]['context']);
+        $this->issuer(tokenAlwaysTaken: true)->issue();
     }
 
     /**
@@ -111,11 +119,12 @@ class ShareLinkIssuerTest extends TestCase
      */
     public function testAnUnreadableCheckoutSessionIsContained(): void
     {
+        $this->logger->expects($this->once())->method('error');
+
         $link = $this->issuer(sessionThrows: true)->issue();
 
         $this->assertFalse($link->isSuccess);
         $this->assertSame('Your cart is not available right now.', (string) $link->message);
-        $this->assertCount(1, $this->logger->errors);
     }
 
     /**

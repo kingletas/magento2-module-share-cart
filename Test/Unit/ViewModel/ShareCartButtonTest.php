@@ -77,7 +77,10 @@ class ShareCartButtonTest extends TestCase
         $unavailable = $this->createMock(ExpressButtonInterface::class);
         $unavailable->method('isAvailable')->willReturn(false);
 
-        $pool = new ExpressButtonPool($this->createMock(LoggerInterface::class), ['a' => $available, 'b' => $unavailable]);
+        $pool = new ExpressButtonPool(
+            $this->createMock(LoggerInterface::class),
+            ['a' => $available, 'b' => $unavailable]
+        );
 
         $this->assertSame([$available], $this->viewModel(pool: $pool)->getExpressButtons());
     }

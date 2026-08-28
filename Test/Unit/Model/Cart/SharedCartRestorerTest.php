@@ -15,7 +15,6 @@ use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Commerce\ShareCart\Model\Cart\RestoreOutcome;
 use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Test\Unit\Fake\InMemorySharedCart;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -26,13 +25,14 @@ use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 class SharedCartRestorerTest extends TestCase
 {
     private const TOKEN = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6'; // pragma: allowlist secret
 
-    private RecordingLogger $logger;
+    private LoggerInterface&MockObject $logger;
     private SnapshotQuote $targetQuote;
     private SnapshotQuote $sessionQuote;
     private SnapshotQuote $sourceQuote;
@@ -50,7 +50,7 @@ class SharedCartRestorerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->logger = new RecordingLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->savedQuotes = [];
         $this->replacedQuotes = [];
 
@@ -155,6 +155,8 @@ class SharedCartRestorerTest extends TestCase
 
     public function testAnUnknownTokenIsReportedAsNotFound(): void
     {
+        $this->logger->expects($this->never())->method('error');
+
         $this->sharedCartRepository = $this->createMock(SharedCartRepositoryInterface::class);
         $this->sharedCartRepository->method('getByToken')
             ->willThrowException(new NoSuchEntityException(__('That shared cart link is not valid.')));
@@ -162,7 +164,6 @@ class SharedCartRestorerTest extends TestCase
         $result = $this->restorer()->restore(self::TOKEN);
 
         $this->assertSame(RestoreOutcome::NotFound, $result->outcome);
-        $this->assertSame([], $this->logger->errors);
     }
 
     /**
@@ -171,6 +172,15 @@ class SharedCartRestorerTest extends TestCase
      */
     public function testARealFailureIsReportedAsAFailureAndLogged(): void
     {
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->anything(),
+                $this->callback(
+                    static fn (array $context): bool => $context['exception'] instanceof RuntimeException
+                )
+            );
+
         $this->cartRepository = $this->createMock(CartRepositoryInterface::class);
         $this->cartRepository->method('get')->willThrowException(new RuntimeException('Deadlock on quote'));
 
@@ -178,8 +188,6 @@ class SharedCartRestorerTest extends TestCase
 
         $this->assertSame(RestoreOutcome::Failed, $result->outcome);
         $this->assertFalse($result->isSuccess());
-        $this->assertCount(1, $this->logger->errors);
-        $this->assertInstanceOf(RuntimeException::class, $this->logger->errors[0]['context']['exception']);
     }
 
     /**

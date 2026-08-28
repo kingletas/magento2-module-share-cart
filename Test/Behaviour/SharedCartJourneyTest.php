@@ -20,7 +20,6 @@ use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\ShareLinkIssuer;
 use Commerce\ShareCart\Test\Behaviour\Fake\InMemorySharedCartRepository;
 use Commerce\ShareCart\Test\Unit\Fake\InMemorySharedCart;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
@@ -31,7 +30,9 @@ use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\StoreManagerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * Alice shares her cart, and Bob opens the link.
@@ -43,7 +44,7 @@ class SharedCartJourneyTest extends TestCase
 
     private TokenGenerator $tokens;
     private InMemorySharedCartRepository $sharedCarts;
-    private RecordingLogger $logger;
+    private LoggerInterface&MockObject $logger;
 
     /** @var array<int, Quote> Quotes the store holds, keyed by id. */
     private array $quotes = [];
@@ -61,7 +62,7 @@ class SharedCartJourneyTest extends TestCase
     {
         $this->tokens = new TokenGenerator();
         $this->sharedCarts = new InMemorySharedCartRepository($this->tokens, self::NOW);
-        $this->logger = new RecordingLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->quotes = [];
         $this->nextQuoteId = 100;
         $this->currentStoreId = 1;
@@ -187,11 +188,12 @@ class SharedCartJourneyTest extends TestCase
      */
     public function testSharingAnEmptyCartIsRefusedWithoutBeingLoggedAsAFault(): void
     {
+        $this->logger->expects($this->never())->method('error');
+
         $link = $this->aliceSharesACartOf(0);
 
         $this->assertFalse($link->isSuccess);
         $this->assertSame('There is nothing in your cart to share.', (string) $link->message);
-        $this->assertSame([], $this->logger->errors);
     }
 
     public function testTheNightlyCleanupRemovesExpiredLinksAndLeavesLiveOnes(): void

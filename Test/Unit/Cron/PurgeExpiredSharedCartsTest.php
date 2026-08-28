@@ -13,20 +13,20 @@ namespace Commerce\ShareCart\Test\Unit\Cron;
 use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Commerce\ShareCart\Cron\PurgeExpiredSharedCarts;
 use Commerce\ShareCart\Model\Config;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 class PurgeExpiredSharedCartsTest extends TestCase
 {
-    private RecordingLogger $logger;
+    private LoggerInterface&MockObject $logger;
     private SharedCartRepositoryInterface&MockObject $repository;
 
     protected function setUp(): void
     {
-        $this->logger = new RecordingLogger();
+        $this->logger = $this->createMock(LoggerInterface::class);
         $this->repository = $this->createMock(SharedCartRepositoryInterface::class);
     }
 
@@ -53,12 +53,13 @@ class PurgeExpiredSharedCartsTest extends TestCase
      */
     public function testARemovalIsReportedWithItsCount(): void
     {
+        $this->logger->expects($this->once())
+            ->method('info')
+            ->with($this->stringContains('4'));
+
         $this->repository->method('purgeExpired')->willReturn(4);
 
         $this->cron(true)->execute();
-
-        $this->assertCount(1, $this->logger->infos);
-        $this->assertStringContainsString('4', $this->logger->infos[0]['message']);
     }
 
     /**
@@ -66,11 +67,11 @@ class PurgeExpiredSharedCartsTest extends TestCase
      */
     public function testAnEmptySweepSaysNothing(): void
     {
+        $this->logger->expects($this->never())->method('info');
+
         $this->repository->method('purgeExpired')->willReturn(0);
 
         $this->cron(true)->execute();
-
-        $this->assertSame([], $this->logger->infos);
     }
 
     /**
@@ -78,13 +79,14 @@ class PurgeExpiredSharedCartsTest extends TestCase
      */
     public function testAFailingSweepIsLoggedRatherThanThrownAtCron(): void
     {
+        $this->logger->expects($this->once())
+            ->method('error')
+            ->with($this->stringContains('cleanup failed'));
+        $this->logger->expects($this->never())->method('info');
+
         $this->repository->method('purgeExpired')->willThrowException(new RuntimeException('lock wait timeout'));
 
         $this->cron(true)->execute();
-
-        $this->assertCount(1, $this->logger->errors);
-        $this->assertStringContainsString('cleanup failed', $this->logger->errors[0]['message']);
-        $this->assertSame([], $this->logger->infos);
     }
 
     private function cron(bool $cleanupEnabled): PurgeExpiredSharedCarts
