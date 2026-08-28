@@ -23,18 +23,18 @@ class RestoreResultTest extends TestCase
         $quote = $this->createMock(CartInterface::class);
         $result = new RestoreResult(RestoreOutcome::Restored, $quote);
 
-        self::assertTrue($result->isSuccess());
-        self::assertSame($quote, $result->quote);
-        self::assertNull($result->message);
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame($quote, $result->quote);
+        $this->assertNull($result->message);
     }
 
     public function testAFailureTakesItsMessageFromTheOutcome(): void
     {
         $result = new RestoreResult(RestoreOutcome::WrongStore);
 
-        self::assertFalse($result->isSuccess());
-        self::assertNull($result->quote);
-        self::assertSame(
+        $this->assertFalse($result->isSuccess());
+        $this->assertNull($result->quote);
+        $this->assertSame(
             (string) RestoreOutcome::WrongStore->message(),
             (string) $result->message
         );

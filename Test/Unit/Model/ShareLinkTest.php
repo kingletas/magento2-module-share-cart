@@ -20,18 +20,18 @@ class ShareLinkTest extends TestCase
     {
         $link = new ShareLink(isSuccess: true, token: 'abc', url: 'https://example.test/c/abc');
 
-        self::assertTrue($link->isSuccess);
-        self::assertSame('abc', $link->token);
-        self::assertSame('https://example.test/c/abc', $link->url);
-        self::assertNull($link->message);
+        $this->assertTrue($link->isSuccess);
+        $this->assertSame('abc', $link->token);
+        $this->assertSame('https://example.test/c/abc', $link->url);
+        $this->assertNull($link->message);
     }
 
     public function testAFailureCarriesAMessage(): void
     {
         $link = new ShareLink(isSuccess: false, message: __('No.'));
 
-        self::assertFalse($link->isSuccess);
-        self::assertSame('No.', (string) $link->message);
+        $this->assertFalse($link->isSuccess);
+        $this->assertSame('No.', (string) $link->message);
     }
 
     public function testASuccessWithoutAUrlIsRefused(): void

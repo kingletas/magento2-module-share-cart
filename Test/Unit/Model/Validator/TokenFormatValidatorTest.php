@@ -24,7 +24,7 @@ class TokenFormatValidatorTest extends TestCase
 
     public function testAcceptsAWellFormedToken(): void
     {
-        self::assertTrue($this->validator->isValid(str_repeat('a1', 16)));
+        $this->assertTrue($this->validator->isValid(str_repeat('a1', 16)));
     }
 
     /**
@@ -33,15 +33,15 @@ class TokenFormatValidatorTest extends TestCase
      */
     public function testRejectsNonHexCharacters(): void
     {
-        self::assertFalse($this->validator->isValid(str_repeat('z', 32)));
-        self::assertFalse($this->validator->isValid(str_repeat('A', 32)));
-        self::assertFalse($this->validator->isValid('../../etc/passwd'));
+        $this->assertFalse($this->validator->isValid(str_repeat('z', 32)));
+        $this->assertFalse($this->validator->isValid(str_repeat('A', 32)));
+        $this->assertFalse($this->validator->isValid('../../etc/passwd'));
     }
 
     public function testRejectsTokensShorterThanTheConfiguredEntropy(): void
     {
-        self::assertFalse($this->validator->isValid(str_repeat('a', 31)));
-        self::assertFalse($this->validator->isValid(''));
+        $this->assertFalse($this->validator->isValid(str_repeat('a', 31)));
+        $this->assertFalse($this->validator->isValid(''));
     }
 
     /**
@@ -50,6 +50,6 @@ class TokenFormatValidatorTest extends TestCase
      */
     public function testRejectsAbsurdlyLongInputWithoutScanningIt(): void
     {
-        self::assertFalse($this->validator->isValid(str_repeat('a', 100000)));
+        $this->assertFalse($this->validator->isValid(str_repeat('a', 100000)));
     }
 }

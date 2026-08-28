@@ -34,20 +34,20 @@ class ShareCartButtonTest extends TestCase
 
     public function testItIsUsableAsALayoutViewModel(): void
     {
-        self::assertInstanceOf(ArgumentInterface::class, $this->viewModel());
+        $this->assertInstanceOf(ArgumentInterface::class, $this->viewModel());
     }
 
     public function testTheEnabledFlagComesFromConfiguration(): void
     {
-        self::assertTrue($this->viewModel(enabled: true)->isEnabled());
-        self::assertFalse($this->viewModel(enabled: false)->isEnabled());
+        $this->assertTrue($this->viewModel(enabled: true)->isEnabled());
+        $this->assertFalse($this->viewModel(enabled: false)->isEnabled());
     }
 
     public function testTheJsConfigCarriesTheGenerateEndpoint(): void
     {
         $config = (array) (new Json())->unserialize($this->viewModel()->getJsonConfig());
 
-        self::assertSame('https://shop.test/sharecart/cart/generate/', $config['generateUrl']);
+        $this->assertSame('https://shop.test/sharecart/cart/generate/', $config['generateUrl']);
     }
 
     /**
@@ -57,7 +57,7 @@ class ShareCartButtonTest extends TestCase
     public function testTheGenerateEndpointIsRequestedOverHttps(): void
     {
         $this->urlBuilder = $this->createMock(UrlInterface::class);
-        $this->urlBuilder->expects(self::once())
+        $this->urlBuilder->expects($this->once())
             ->method('getUrl')
             ->with('sharecart/cart/generate', ['_secure' => true])
             ->willReturn('https://shop.test/sharecart/cart/generate/');
@@ -67,7 +67,7 @@ class ShareCartButtonTest extends TestCase
 
     public function testTheJsConfigIsJsonRatherThanAnArray(): void
     {
-        self::assertJson($this->viewModel()->getJsonConfig());
+        $this->assertJson($this->viewModel()->getJsonConfig());
     }
 
     public function testTheExpressButtonsComeFromThePool(): void
@@ -79,7 +79,7 @@ class ShareCartButtonTest extends TestCase
 
         $pool = new ExpressButtonPool(new RecordingLogger(), ['a' => $available, 'b' => $unavailable]);
 
-        self::assertSame([$available], $this->viewModel(pool: $pool)->getExpressButtons());
+        $this->assertSame([$available], $this->viewModel(pool: $pool)->getExpressButtons());
     }
 
     /**
@@ -88,7 +88,7 @@ class ShareCartButtonTest extends TestCase
      */
     public function testAStoreWithNoExpressMethodsGetsAnEmptyList(): void
     {
-        self::assertSame([], $this->viewModel()->getExpressButtons());
+        $this->assertSame([], $this->viewModel()->getExpressButtons());
     }
 
     private function viewModel(bool $enabled = true, ?ExpressButtonPool $pool = null): ShareCartButton

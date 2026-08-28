@@ -27,12 +27,12 @@ class SharedCartTest extends TestCase
     {
         $declared = (new \ReflectionProperty(SharedCart::class, '_resourceName'))->getValue($this->entity());
 
-        self::assertSame(SharedCartResource::class, $declared);
+        $this->assertSame(SharedCartResource::class, $declared);
     }
 
     public function testTheEntityIsKeyedOnTheSharedCartId(): void
     {
-        self::assertSame(SharedCartInterface::SHARED_CART_ID, $this->entity()->getIdFieldName());
+        $this->assertSame(SharedCartInterface::SHARED_CART_ID, $this->entity()->getIdFieldName());
     }
 
     public function testEveryFieldRoundTripsThroughItsSetter(): void
@@ -46,22 +46,22 @@ class SharedCartTest extends TestCase
             ->setUpdatedAt('2026-01-02 00:00:00')
             ->setExpiresAt('2026-02-01 00:00:00');
 
-        self::assertSame(5, $entity->getSharedCartId());
-        self::assertSame(1, $entity->getStoreId());
-        self::assertSame(99, $entity->getQuoteId());
-        self::assertSame('abc123', $entity->getTokenHash());
-        self::assertSame('2026-01-01 00:00:00', $entity->getCreatedAt());
-        self::assertSame('2026-01-02 00:00:00', $entity->getUpdatedAt());
-        self::assertSame('2026-02-01 00:00:00', $entity->getExpiresAt());
+        $this->assertSame(5, $entity->getSharedCartId());
+        $this->assertSame(1, $entity->getStoreId());
+        $this->assertSame(99, $entity->getQuoteId());
+        $this->assertSame('abc123', $entity->getTokenHash());
+        $this->assertSame('2026-01-01 00:00:00', $entity->getCreatedAt());
+        $this->assertSame('2026-01-02 00:00:00', $entity->getUpdatedAt());
+        $this->assertSame('2026-02-01 00:00:00', $entity->getExpiresAt());
     }
 
     public function testTheSettersAreFluentAndReturnTheEntityItself(): void
     {
         $entity = $this->entity();
 
-        self::assertSame($entity, $entity->setStoreId(1));
-        self::assertSame($entity, $entity->setQuoteId(1));
-        self::assertSame($entity, $entity->setTokenHash('x'));
+        $this->assertSame($entity, $entity->setStoreId(1));
+        $this->assertSame($entity, $entity->setQuoteId(1));
+        $this->assertSame($entity, $entity->setTokenHash('x'));
     }
 
     /**
@@ -74,9 +74,9 @@ class SharedCartTest extends TestCase
         $entity->setData(SharedCartInterface::QUOTE_ID, '99');
         $entity->setData(SharedCartInterface::SHARED_CART_ID, '5');
 
-        self::assertSame(1, $entity->getStoreId());
-        self::assertSame(99, $entity->getQuoteId());
-        self::assertSame(5, $entity->getSharedCartId());
+        $this->assertSame(1, $entity->getStoreId());
+        $this->assertSame(99, $entity->getQuoteId());
+        $this->assertSame(5, $entity->getSharedCartId());
     }
 
     public function testTheTokenHashCoercesToAString(): void
@@ -84,7 +84,7 @@ class SharedCartTest extends TestCase
         $entity = $this->entity();
         $entity->setData(SharedCartInterface::TOKEN, 12345);
 
-        self::assertSame('12345', $entity->getTokenHash());
+        $this->assertSame('12345', $entity->getTokenHash());
     }
 
     /**
@@ -93,7 +93,7 @@ class SharedCartTest extends TestCase
      */
     public function testAnUnsavedEntityHasNoIdRatherThanZero(): void
     {
-        self::assertNull($this->entity()->getSharedCartId());
+        $this->assertNull($this->entity()->getSharedCartId());
     }
 
     /**
@@ -104,18 +104,18 @@ class SharedCartTest extends TestCase
     {
         $entity = $this->entity();
 
-        self::assertNull($entity->getExpiresAt());
-        self::assertNull($entity->getCreatedAt());
-        self::assertNull($entity->getUpdatedAt());
+        $this->assertNull($entity->getExpiresAt());
+        $this->assertNull($entity->getCreatedAt());
+        $this->assertNull($entity->getUpdatedAt());
     }
 
     public function testTheStoreAndQuoteIdsDefaultToZeroWhenUnset(): void
     {
         $entity = $this->entity();
 
-        self::assertSame(0, $entity->getStoreId());
-        self::assertSame(0, $entity->getQuoteId());
-        self::assertSame('', $entity->getTokenHash());
+        $this->assertSame(0, $entity->getStoreId());
+        $this->assertSame(0, $entity->getQuoteId());
+        $this->assertSame('', $entity->getTokenHash());
     }
 
     /**

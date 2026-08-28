@@ -49,15 +49,15 @@ class ShareTest extends TestCase
 
     public function testItOnlyAnswersGets(): void
     {
-        self::assertInstanceOf(HttpGetActionInterface::class, $this->controller());
+        $this->assertInstanceOf(HttpGetActionInterface::class, $this->controller());
     }
 
     public function testARestoredCartLandsOnTheCartWithASuccessMessage(): void
     {
         $this->controller()->execute();
 
-        self::assertSame('checkout/cart', $this->redirectedTo);
-        self::assertSame('success', $this->messages[0]['level']);
+        $this->assertSame('checkout/cart', $this->redirectedTo);
+        $this->assertSame('success', $this->messages[0]['level']);
     }
 
     /**
@@ -83,7 +83,7 @@ class ShareTest extends TestCase
         $this->controller(enabled: false)->execute();
         $paths[] = $this->redirectedTo;
 
-        self::assertSame(['checkout/cart', 'checkout/cart', 'checkout/cart', 'checkout/cart'], $paths);
+        $this->assertSame(['checkout/cart', 'checkout/cart', 'checkout/cart', 'checkout/cart'], $paths);
     }
 
     /**
@@ -93,22 +93,22 @@ class ShareTest extends TestCase
     {
         $this->token = 'not-a-token';
         $this->restorer = $this->createMock(SharedCartRestorer::class);
-        $this->restorer->expects(self::never())->method('restore');
+        $this->restorer->expects($this->never())->method('restore');
 
         $this->controller()->execute();
 
-        self::assertSame('error', $this->messages[0]['level']);
+        $this->assertSame('error', $this->messages[0]['level']);
     }
 
     public function testAMissingTokenParameterIsTreatedAsMalformed(): void
     {
         $this->token = '';
         $this->restorer = $this->createMock(SharedCartRestorer::class);
-        $this->restorer->expects(self::never())->method('restore');
+        $this->restorer->expects($this->never())->method('restore');
 
         $this->controller()->execute();
 
-        self::assertSame('error', $this->messages[0]['level']);
+        $this->assertSame('error', $this->messages[0]['level']);
     }
 
     public function testAFailedRestoreShowsTheOutcomesOwnMessage(): void
@@ -118,8 +118,8 @@ class ShareTest extends TestCase
 
         $this->controller()->execute();
 
-        self::assertSame('error', $this->messages[0]['level']);
-        self::assertSame(
+        $this->assertSame('error', $this->messages[0]['level']);
+        $this->assertSame(
             (string) RestoreOutcome::WrongStore->message(),
             $this->messages[0]['message']
         );
@@ -141,7 +141,7 @@ class ShareTest extends TestCase
         $this->token = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6'; // pragma: allowlist secret
         $this->controller()->execute();
 
-        self::assertSame($unknown, $this->messages[0]['message']);
+        $this->assertSame($unknown, $this->messages[0]['message']);
     }
 
     /**
@@ -152,7 +152,7 @@ class ShareTest extends TestCase
     {
         $this->controller(enabled: false)->execute();
 
-        self::assertSame([], $this->messages);
+        $this->assertSame([], $this->messages);
     }
 
     private function controller(bool $enabled = true): Share

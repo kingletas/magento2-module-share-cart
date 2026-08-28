@@ -17,10 +17,10 @@ class RestoreOutcomeTest extends TestCase
 {
     public function testOnlyARestoredOutcomeCountsAsSuccess(): void
     {
-        self::assertTrue(RestoreOutcome::Restored->isSuccess());
-        self::assertFalse(RestoreOutcome::NotFound->isSuccess());
-        self::assertFalse(RestoreOutcome::WrongStore->isSuccess());
-        self::assertFalse(RestoreOutcome::Failed->isSuccess());
+        $this->assertTrue(RestoreOutcome::Restored->isSuccess());
+        $this->assertFalse(RestoreOutcome::NotFound->isSuccess());
+        $this->assertFalse(RestoreOutcome::WrongStore->isSuccess());
+        $this->assertFalse(RestoreOutcome::Failed->isSuccess());
     }
 
     /**
@@ -34,12 +34,12 @@ class RestoreOutcomeTest extends TestCase
             (string) RestoreOutcome::Failed->message(),
         ];
 
-        self::assertSame($messages, array_unique($messages));
-        self::assertNotContains('', $messages);
+        $this->assertSame($messages, array_unique($messages));
+        $this->assertNotContains('', $messages);
     }
 
     public function testASuccessfulRestoreHasNothingToApologiseFor(): void
     {
-        self::assertNull(RestoreOutcome::Restored->message());
+        $this->assertNull(RestoreOutcome::Restored->message());
     }
 }

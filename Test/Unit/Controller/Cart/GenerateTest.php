@@ -48,17 +48,17 @@ class GenerateTest extends TestCase
 
     public function testItOnlyAnswersPosts(): void
     {
-        self::assertInstanceOf(HttpPostActionInterface::class, $this->controller());
+        $this->assertInstanceOf(HttpPostActionInterface::class, $this->controller());
     }
 
     public function testASuccessfulShareReturnsTheTokenAndItsUrl(): void
     {
         $this->controller()->execute();
 
-        self::assertFalse($this->data['error']);
-        self::assertSame('tok3n', $this->data['token']);
-        self::assertSame('https://shop.test/sharecart/cart/share/token/tok3n', $this->data['url']);
-        self::assertNull($this->status);
+        $this->assertFalse($this->data['error']);
+        $this->assertSame('tok3n', $this->data['token']);
+        $this->assertSame('https://shop.test/sharecart/cart/share/token/tok3n', $this->data['url']);
+        $this->assertNull($this->status);
     }
 
     /**
@@ -70,12 +70,12 @@ class GenerateTest extends TestCase
         $this->formKeyValidator = $this->createMock(FormKeyValidator::class);
         $this->formKeyValidator->method('validate')->willReturn(false);
         $this->shareLinkIssuer = $this->createMock(ShareLinkIssuer::class);
-        $this->shareLinkIssuer->expects(self::never())->method('issue');
+        $this->shareLinkIssuer->expects($this->never())->method('issue');
 
         $this->controller()->execute();
 
-        self::assertSame(403, $this->status);
-        self::assertTrue($this->data['error']);
+        $this->assertSame(403, $this->status);
+        $this->assertTrue($this->data['error']);
     }
 
     /**
@@ -86,8 +86,8 @@ class GenerateTest extends TestCase
     {
         $this->controller(enabled: false)->execute();
 
-        self::assertSame(404, $this->status);
-        self::assertTrue($this->data['error']);
+        $this->assertSame(404, $this->status);
+        $this->assertTrue($this->data['error']);
     }
 
     /**
@@ -97,7 +97,7 @@ class GenerateTest extends TestCase
     public function testADisabledFeatureIsRefusedWithoutValidatingAnything(): void
     {
         $this->formKeyValidator = $this->createMock(FormKeyValidator::class);
-        $this->formKeyValidator->expects(self::never())->method('validate');
+        $this->formKeyValidator->expects($this->never())->method('validate');
 
         $this->controller(enabled: false)->execute();
     }
@@ -114,9 +114,9 @@ class GenerateTest extends TestCase
 
         $this->controller()->execute();
 
-        self::assertSame(422, $this->status);
-        self::assertTrue($this->data['error']);
-        self::assertSame('Your cart is empty.', (string) $this->data['message']);
+        $this->assertSame(422, $this->status);
+        $this->assertTrue($this->data['error']);
+        $this->assertSame('Your cart is empty.', (string) $this->data['message']);
     }
 
     /**
@@ -142,7 +142,7 @@ class GenerateTest extends TestCase
         $this->controller()->execute();
         $statuses[] = $this->status;
 
-        self::assertSame([404, 403, 422], $statuses);
+        $this->assertSame([404, 403, 422], $statuses);
     }
 
     private function controller(bool $enabled = true): Generate

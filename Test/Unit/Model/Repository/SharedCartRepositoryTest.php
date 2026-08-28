@@ -89,7 +89,7 @@ class SharedCartRepositoryTest extends TestCase
     {
         $this->row(SharedCartInterface::SHARED_CART_ID, 5, ['id' => 5, 'quote_id' => 77]);
 
-        self::assertSame(5, $this->repository()->getById(5)->getSharedCartId());
+        $this->assertSame(5, $this->repository()->getById(5)->getSharedCartId());
     }
 
     public function testAnUnknownIdIsNoSuchEntity(): void
@@ -103,8 +103,8 @@ class SharedCartRepositoryTest extends TestCase
     {
         $this->row(SharedCartInterface::QUOTE_ID, 77, ['id' => 5, 'quote_id' => 77]);
 
-        self::assertSame(77, $this->repository()->getByQuoteId(77)->getQuoteId());
-        self::assertSame(SharedCartInterface::QUOTE_ID, $this->loads[0]['field']);
+        $this->assertSame(77, $this->repository()->getByQuoteId(77)->getQuoteId());
+        $this->assertSame(SharedCartInterface::QUOTE_ID, $this->loads[0]['field']);
     }
 
     public function testAnUnknownQuoteIdIsNoSuchEntity(): void
@@ -124,8 +124,8 @@ class SharedCartRepositoryTest extends TestCase
 
         $this->repository()->getByToken('tok3n');
 
-        self::assertSame(SharedCartInterface::TOKEN, $this->loads[0]['field']);
-        self::assertSame('hash-of-tok3n', $this->loads[0]['value']);
+        $this->assertSame(SharedCartInterface::TOKEN, $this->loads[0]['field']);
+        $this->assertSame('hash-of-tok3n', $this->loads[0]['value']);
     }
 
     /**
@@ -140,8 +140,8 @@ class SharedCartRepositoryTest extends TestCase
         $first = $repository->getByToken('tok3n');
         $second = $repository->getByToken('tok3n');
 
-        self::assertSame($first, $second);
-        self::assertCount(1, $this->loads);
+        $this->assertSame($first, $second);
+        $this->assertCount(1, $this->loads);
     }
 
     /**
@@ -157,20 +157,20 @@ class SharedCartRepositoryTest extends TestCase
         foreach (['unknown', 'old'] as $token) {
             try {
                 $this->repository()->getByToken($token);
-                self::fail('Expected the lookup to fail for "' . $token . '".');
+                $this->fail('Expected the lookup to fail for "' . $token . '".');
             } catch (NoSuchEntityException $e) {
                 $messages[] = $e->getMessage();
             }
         }
 
-        self::assertSame($messages[0], $messages[1]);
+        $this->assertSame($messages[0], $messages[1]);
     }
 
     public function testALinkWhoseExpiryHasNotPassedIsStillValid(): void
     {
         $this->row(SharedCartInterface::TOKEN, 'hash-of-tok3n', ['id' => 5, 'expires_at' => '2026-09-01 00:00:00']);
 
-        self::assertSame(5, $this->repository()->getByToken('tok3n')->getSharedCartId());
+        $this->assertSame(5, $this->repository()->getByToken('tok3n')->getSharedCartId());
     }
 
     /**
@@ -181,7 +181,7 @@ class SharedCartRepositoryTest extends TestCase
     {
         $this->row(SharedCartInterface::TOKEN, 'hash-of-tok3n', ['id' => 5, 'expires_at' => null]);
 
-        self::assertSame(5, $this->repository()->getByToken('tok3n')->getSharedCartId());
+        $this->assertSame(5, $this->repository()->getByToken('tok3n')->getSharedCartId());
     }
 
     /**
@@ -197,21 +197,21 @@ class SharedCartRepositoryTest extends TestCase
         foreach ([1, 2] as $attempt) {
             try {
                 $repository->getByToken('tok3n');
-                self::fail('Expected attempt ' . $attempt . ' to be refused.');
+                $this->fail('Expected attempt ' . $attempt . ' to be refused.');
             } catch (NoSuchEntityException) {
                 $refusals++;
             }
         }
 
-        self::assertSame(2, $refusals);
+        $this->assertSame(2, $refusals);
     }
 
     public function testSavingReturnsTheEntityItPersisted(): void
     {
         $entity = $this->entity();
 
-        self::assertSame($entity, $this->repository()->save($entity));
-        self::assertSame([$entity], $this->saved);
+        $this->assertSame($entity, $this->repository()->save($entity));
+        $this->assertSame([$entity], $this->saved);
     }
 
     /**
@@ -234,7 +234,7 @@ class SharedCartRepositoryTest extends TestCase
 
         $this->repository()->delete($entity);
 
-        self::assertSame([$entity], $this->deleted);
+        $this->assertSame([$entity], $this->deleted);
     }
 
     public function testAFailedDeleteIsWrappedInTheContractsException(): void
@@ -253,8 +253,8 @@ class SharedCartRepositoryTest extends TestCase
 
         $this->repository()->deleteById(5);
 
-        self::assertCount(1, $this->deleted);
-        self::assertSame(5, $this->deleted[0]->getSharedCartId());
+        $this->assertCount(1, $this->deleted);
+        $this->assertSame(5, $this->deleted[0]->getSharedCartId());
     }
 
     /**
@@ -270,12 +270,12 @@ class SharedCartRepositoryTest extends TestCase
     public function testPurgingExpiredUsesTheCurrentGmtTime(): void
     {
         $this->resource = $this->createMock(SharedCartResource::class);
-        $this->resource->expects(self::once())
+        $this->resource->expects($this->once())
             ->method('deleteExpired')
             ->with(self::NOW)
             ->willReturn(4);
 
-        self::assertSame(4, $this->repository()->purgeExpired());
+        $this->assertSame(4, $this->repository()->purgeExpired());
     }
 
     public function testTheListGoesThroughTheSharedSearchResultBuilder(): void
@@ -284,9 +284,9 @@ class SharedCartRepositoryTest extends TestCase
         $results = $this->createMock(SharedCartSearchResultsInterface::class);
 
         $builder = $this->createMock(SearchResultBuilder::class);
-        $builder->expects(self::once())->method('build')->willReturn($results);
+        $builder->expects($this->once())->method('build')->willReturn($results);
 
-        self::assertSame($results, $this->repository($builder)->getList($criteria));
+        $this->assertSame($results, $this->repository($builder)->getList($criteria));
     }
 
     /**

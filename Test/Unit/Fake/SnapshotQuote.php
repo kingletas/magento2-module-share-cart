@@ -14,7 +14,7 @@ use Magento\Quote\Model\Quote;
  *
  * @SuppressWarnings(PHPMD.MissingConstructor)
  */
-final class SnapshotQuote extends Quote
+class SnapshotQuote extends Quote
 {
     /** @var Quote[] */
     public array $merged = [];

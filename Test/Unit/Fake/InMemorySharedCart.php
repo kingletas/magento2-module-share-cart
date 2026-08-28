@@ -12,7 +12,7 @@ use Commerce\ShareCart\Api\Data\SharedCartInterface;
 /**
  * The entity, in an array.
  */
-final class InMemorySharedCart implements SharedCartInterface
+class InMemorySharedCart implements SharedCartInterface
 {
     /** @var array<string, mixed> */
     private array $data = [];

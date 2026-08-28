@@ -28,8 +28,8 @@ class CollectionTest extends TestCase
     {
         $collection = $this->collection();
 
-        self::assertSame(SharedCart::class, $collection->getModelName());
-        self::assertSame(SharedCartResource::class, $collection->getResourceModelName());
+        $this->assertSame(SharedCart::class, $collection->getModelName());
+        $this->assertSame(SharedCartResource::class, $collection->getResourceModelName());
     }
 
     /**
@@ -37,7 +37,7 @@ class CollectionTest extends TestCase
      */
     public function testTheIdFieldIsSetThroughTheSetter(): void
     {
-        self::assertSame(SharedCartInterface::SHARED_CART_ID, $this->collection()->getIdFieldName());
+        $this->assertSame(SharedCartInterface::SHARED_CART_ID, $this->collection()->getIdFieldName());
     }
 
     /**
@@ -45,7 +45,7 @@ class CollectionTest extends TestCase
      */
     public function testTheIdFieldIsNotTheFrameworkDefault(): void
     {
-        self::assertNotSame('id', $this->collection()->getIdFieldName());
+        $this->assertNotSame('id', $this->collection()->getIdFieldName());
     }
 
     private function collection(): Collection

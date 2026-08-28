@@ -85,26 +85,26 @@ class SharedCartRestorerTest extends TestCase
     {
         $result = $this->restorer()->restore(self::TOKEN);
 
-        self::assertTrue($result->isSuccess());
-        self::assertSame(RestoreOutcome::Restored, $result->outcome);
-        self::assertSame($this->targetQuote, $result->quote);
-        self::assertSame([$this->targetQuote], $this->replacedQuotes);
+        $this->assertTrue($result->isSuccess());
+        $this->assertSame(RestoreOutcome::Restored, $result->outcome);
+        $this->assertSame($this->targetQuote, $result->quote);
+        $this->assertSame([$this->targetQuote], $this->replacedQuotes);
     }
 
     public function testTheRestoredQuoteIsSavedActiveWithItsTotalsCollected(): void
     {
         $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame([$this->targetQuote], $this->savedQuotes);
-        self::assertTrue((bool) $this->targetQuote->getData('is_active'));
-        self::assertTrue($this->targetQuote->totalsCollected);
+        $this->assertSame([$this->targetQuote], $this->savedQuotes);
+        $this->assertTrue((bool) $this->targetQuote->getData('is_active'));
+        $this->assertTrue($this->targetQuote->totalsCollected);
     }
 
     public function testTheSharedItemsAreMergedIntoTheNewQuote(): void
     {
         $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame([$this->sourceQuote], $this->targetQuote->merged);
+        $this->assertSame([$this->sourceQuote], $this->targetQuote->merged);
     }
 
     /**
@@ -116,7 +116,7 @@ class SharedCartRestorerTest extends TestCase
 
         $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame([$this->sessionQuote, $this->sourceQuote], $this->targetQuote->merged);
+        $this->assertSame([$this->sessionQuote, $this->sourceQuote], $this->targetQuote->merged);
     }
 
     /**
@@ -127,14 +127,14 @@ class SharedCartRestorerTest extends TestCase
     {
         $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame([$this->sourceQuote], $this->targetQuote->merged);
+        $this->assertSame([$this->sourceQuote], $this->targetQuote->merged);
     }
 
     public function testTheNewQuoteTakesTheStoreTheLinkWasIssuedOn(): void
     {
         $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame(1, (int) $this->targetQuote->getData('store_id'));
+        $this->assertSame(1, (int) $this->targetQuote->getData('store_id'));
     }
 
     /**
@@ -147,10 +147,10 @@ class SharedCartRestorerTest extends TestCase
 
         $result = $this->restorer()->restore(self::TOKEN);
 
-        self::assertFalse($result->isSuccess());
-        self::assertSame(RestoreOutcome::WrongStore, $result->outcome);
-        self::assertSame([], $this->savedQuotes);
-        self::assertSame([], $this->replacedQuotes);
+        $this->assertFalse($result->isSuccess());
+        $this->assertSame(RestoreOutcome::WrongStore, $result->outcome);
+        $this->assertSame([], $this->savedQuotes);
+        $this->assertSame([], $this->replacedQuotes);
     }
 
     public function testAnUnknownTokenIsReportedAsNotFound(): void
@@ -161,8 +161,8 @@ class SharedCartRestorerTest extends TestCase
 
         $result = $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame(RestoreOutcome::NotFound, $result->outcome);
-        self::assertSame([], $this->logger->errors);
+        $this->assertSame(RestoreOutcome::NotFound, $result->outcome);
+        $this->assertSame([], $this->logger->errors);
     }
 
     /**
@@ -176,10 +176,10 @@ class SharedCartRestorerTest extends TestCase
 
         $result = $this->restorer()->restore(self::TOKEN);
 
-        self::assertSame(RestoreOutcome::Failed, $result->outcome);
-        self::assertFalse($result->isSuccess());
-        self::assertCount(1, $this->logger->errors);
-        self::assertInstanceOf(RuntimeException::class, $this->logger->errors[0]['context']['exception']);
+        $this->assertSame(RestoreOutcome::Failed, $result->outcome);
+        $this->assertFalse($result->isSuccess());
+        $this->assertCount(1, $this->logger->errors);
+        $this->assertInstanceOf(RuntimeException::class, $this->logger->errors[0]['context']['exception']);
     }
 
     /**
@@ -193,7 +193,7 @@ class SharedCartRestorerTest extends TestCase
 
         $result = $this->restorer()->restore(self::TOKEN);
 
-        self::assertStringNotContainsString('Deadlock', (string) $result->message);
+        $this->assertStringNotContainsString('Deadlock', (string) $result->message);
     }
 
     /**
@@ -207,13 +207,13 @@ class SharedCartRestorerTest extends TestCase
 
         $result = $this->restorer($storeManager)->restore(self::TOKEN);
 
-        self::assertSame(RestoreOutcome::WrongStore, $result->outcome);
+        $this->assertSame(RestoreOutcome::WrongStore, $result->outcome);
     }
 
     public function testTheTokenIsLookedUpExactlyOnce(): void
     {
         $this->sharedCartRepository = $this->createMock(SharedCartRepositoryInterface::class);
-        $this->sharedCartRepository->expects(self::once())
+        $this->sharedCartRepository->expects($this->once())
             ->method('getByToken')
             ->with(self::TOKEN)
             ->willReturn($this->sharedCart(1, 77));

@@ -38,7 +38,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * What a stranger with a URL costs.
  */
-final class EnumerationCostTest extends TestCase
+class EnumerationCostTest extends TestCase
 {
     use BudgetAssertions;
 
@@ -70,7 +70,7 @@ final class EnumerationCostTest extends TestCase
             $this->controller($guess)->execute();
         }
 
-        self::assertCostAtMost('database lookups for six malformed tokens', 0, $this->lookups);
+        $this->assertCostAtMost('database lookups for six malformed tokens', 0, $this->lookups);
     }
 
     /**
@@ -79,7 +79,7 @@ final class EnumerationCostTest extends TestCase
      */
     public function testAFloodOfMalformedGuessesCostsNothingAtAnyRate(): void
     {
-        self::assertConstantCost(
+        $this->assertConstantCost(
             'database lookups while rejecting malformed tokens',
             function (int $guesses): int {
                 $this->lookups = 0;
@@ -103,7 +103,7 @@ final class EnumerationCostTest extends TestCase
     {
         $this->controller((new TokenGenerator())->generate())->execute();
 
-        self::assertCostAtMost('one plausible guess', 1, $this->lookups);
+        $this->assertCostAtMost('one plausible guess', 1, $this->lookups);
     }
 
     /**
@@ -114,7 +114,7 @@ final class EnumerationCostTest extends TestCase
     {
         $this->controller((new TokenGenerator())->generate(), enabled: false)->execute();
 
-        self::assertSame(0, $this->lookups);
+        $this->assertSame(0, $this->lookups);
     }
 
     /**
@@ -125,12 +125,12 @@ final class EnumerationCostTest extends TestCase
     {
         $validator = new TokenFormatValidator();
 
-        self::assertFalse(
+        $this->assertFalse(
             $validator->isValid(str_repeat('f', 1_000_000)),
             'A megabyte of valid hex must be refused on length, before anything scans it.'
         );
-        self::assertFalse($validator->isValid(str_repeat('f', 513)));
-        self::assertTrue($validator->isValid(str_repeat('f', 512)), 'The bound must not reject a real token.');
+        $this->assertFalse($validator->isValid(str_repeat('f', 513)));
+        $this->assertTrue($validator->isValid(str_repeat('f', 512)), 'The bound must not reject a real token.');
     }
 
     private function controller(string $token = '', bool $enabled = true): Share

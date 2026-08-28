@@ -29,9 +29,9 @@ class ConfigTest extends TestCase
         ]);
         $config = new Config($scopeConfig, 'acme_sharecart');
 
-        self::assertTrue($config->isEnabled());
-        self::assertSame(7, $config->getLifetimeDays());
-        self::assertTrue($config->isCleanupEnabled());
+        $this->assertTrue($config->isEnabled());
+        $this->assertSame(7, $config->getLifetimeDays());
+        $this->assertTrue($config->isCleanupEnabled());
     }
 
     /**
@@ -41,16 +41,16 @@ class ConfigTest extends TestCase
     {
         $config = $this->config(['general/enabled' => '0', 'general/cleanup_enabled' => '0']);
 
-        self::assertFalse($config->isEnabled());
-        self::assertFalse($config->isCleanupEnabled());
+        $this->assertFalse($config->isEnabled());
+        $this->assertFalse($config->isCleanupEnabled());
     }
 
     public function testAnUnsetFeatureIsOff(): void
     {
         $config = $this->config([]);
 
-        self::assertFalse($config->isEnabled());
-        self::assertFalse($config->isCleanupEnabled());
+        $this->assertFalse($config->isEnabled());
+        $this->assertFalse($config->isCleanupEnabled());
     }
 
     /**
@@ -59,13 +59,13 @@ class ConfigTest extends TestCase
      */
     public function testTheLifetimeFallsBackToADefaultRatherThanZero(): void
     {
-        self::assertSame(Config::DEFAULT_LIFETIME_DAYS, $this->config([])->getLifetimeDays());
-        self::assertGreaterThan(0, Config::DEFAULT_LIFETIME_DAYS);
+        $this->assertSame(Config::DEFAULT_LIFETIME_DAYS, $this->config([])->getLifetimeDays());
+        $this->assertGreaterThan(0, Config::DEFAULT_LIFETIME_DAYS);
     }
 
     public function testANonNumericLifetimeFallsBackToTheDefault(): void
     {
-        self::assertSame(
+        $this->assertSame(
             Config::DEFAULT_LIFETIME_DAYS,
             $this->config(['general/lifetime_days' => 'thirty'])->getLifetimeDays()
         );
@@ -77,7 +77,7 @@ class ConfigTest extends TestCase
      */
     public function testZeroDisablesExpiryRatherThanRestoringTheDefault(): void
     {
-        self::assertSame(0, $this->config(['general/lifetime_days' => '0'])->getLifetimeDays());
+        $this->assertSame(0, $this->config(['general/lifetime_days' => '0'])->getLifetimeDays());
     }
 
     /**
@@ -86,14 +86,14 @@ class ConfigTest extends TestCase
      */
     public function testANegativeLifetimeIsClampedToZeroRatherThanExpiringEveryLink(): void
     {
-        self::assertSame(0, $this->config(['general/lifetime_days' => '-5'])->getLifetimeDays());
+        $this->assertSame(0, $this->config(['general/lifetime_days' => '-5'])->getLifetimeDays());
     }
 
     public function testTheStoreIdIsPassedThroughToTheScopeLookup(): void
     {
         $scopeConfig = new ArrayScopeConfig(['test_sharecart/general/lifetime_days' => '3']);
 
-        self::assertSame(3, (new Config($scopeConfig, 'test_sharecart'))->getLifetimeDays(2));
+        $this->assertSame(3, (new Config($scopeConfig, 'test_sharecart'))->getLifetimeDays(2));
     }
 
     /**

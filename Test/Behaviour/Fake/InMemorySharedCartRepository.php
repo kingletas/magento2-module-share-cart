@@ -21,7 +21,7 @@ use Magento\Framework\Phrase;
 /**
  * The shared-cart table, in an array, with its two rules intact.
  */
-final class InMemorySharedCartRepository implements SharedCartRepositoryInterface
+class InMemorySharedCartRepository implements SharedCartRepositoryInterface
 {
     /** @var array<int, SharedCartInterface> Keyed by id. */
     private array $rows = [];

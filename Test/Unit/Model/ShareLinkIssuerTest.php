@@ -32,7 +32,7 @@ use RuntimeException;
  * Three behaviours, each of them a production incident in waiting if it goes
  * the other way.
  */
-final class ShareLinkIssuerTest extends TestCase
+class ShareLinkIssuerTest extends TestCase
 {
     private RecordingLogger $logger;
     private int $tokenCalls = 0;
@@ -51,25 +51,25 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $link = $this->issuer(itemsCount: 0)->issue();
 
-        self::assertFalse($link->isSuccess);
-        self::assertSame('There is nothing in your cart to share.', (string) $link->message);
-        self::assertNull($link->token);
+        $this->assertFalse($link->isSuccess);
+        $this->assertSame('There is nothing in your cart to share.', (string) $link->message);
+        $this->assertNull($link->token);
     }
 
     public function testAnEmptyCartIsNotLoggedAsAnError(): void
     {
         $this->issuer(itemsCount: 0)->issue();
 
-        self::assertSame([], $this->logger->errors, 'An empty cart is a shopper action, not a fault.');
+        $this->assertSame([], $this->logger->errors, 'An empty cart is a shopper action, not a fault.');
     }
 
     public function testASuccessfulIssueReturnsATokenAndAUrl(): void
     {
         $link = $this->issuer()->issue();
 
-        self::assertTrue($link->isSuccess);
-        self::assertSame('token-1', $link->token);
-        self::assertSame('https://example.test/sharecart/cart/share/token/token-1', $link->url);
+        $this->assertTrue($link->isSuccess);
+        $this->assertSame('token-1', $link->token);
+        $this->assertSame('https://example.test/sharecart/cart/share/token/token-1', $link->url);
     }
 
     /**
@@ -79,8 +79,8 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $link = $this->issuer(tokenAlwaysTaken: true)->issue();
 
-        self::assertFalse($link->isSuccess);
-        self::assertLessThanOrEqual(
+        $this->assertFalse($link->isSuccess);
+        $this->assertLessThanOrEqual(
             5,
             $this->tokenCalls,
             'Allocation must be bounded, not recursive.'
@@ -91,19 +91,19 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $link = $this->issuer(tokenAlwaysTaken: true)->issue();
 
-        self::assertSame(
+        $this->assertSame(
             'We could not create a share link for your cart. Please try again.',
             (string) $link->message
         );
-        self::assertStringNotContainsString('token', (string) $link->message);
+        $this->assertStringNotContainsString('token', (string) $link->message);
     }
 
     public function testTheInternalReasonReachesTheLogEvenThoughTheShopperNeverSeesIt(): void
     {
         $this->issuer(tokenAlwaysTaken: true)->issue();
 
-        self::assertCount(1, $this->logger->errors);
-        self::assertArrayHasKey('exception', $this->logger->errors[0]['context']);
+        $this->assertCount(1, $this->logger->errors);
+        $this->assertArrayHasKey('exception', $this->logger->errors[0]['context']);
     }
 
     /**
@@ -113,9 +113,9 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $link = $this->issuer(sessionThrows: true)->issue();
 
-        self::assertFalse($link->isSuccess);
-        self::assertSame('Your cart is not available right now.', (string) $link->message);
-        self::assertCount(1, $this->logger->errors);
+        $this->assertFalse($link->isSuccess);
+        $this->assertSame('Your cart is not available right now.', (string) $link->message);
+        $this->assertCount(1, $this->logger->errors);
     }
 
     /**
@@ -126,12 +126,12 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $link = $this->issuer(saveThrows: true)->issue();
 
-        self::assertFalse($link->isSuccess);
-        self::assertSame(
+        $this->assertFalse($link->isSuccess);
+        $this->assertSame(
             'We could not create a share link for your cart. Please try again.',
             (string) $link->message
         );
-        self::assertStringNotContainsString('SQLSTATE', (string) $link->message);
+        $this->assertStringNotContainsString('SQLSTATE', (string) $link->message);
     }
 
     /**
@@ -141,19 +141,19 @@ final class ShareLinkIssuerTest extends TestCase
     {
         $this->issuer()->issue();
 
-        self::assertCount(1, $this->savedQuotes);
+        $this->assertCount(1, $this->savedQuotes);
         $snapshot = $this->savedQuotes[0];
 
-        self::assertNull($snapshot->getCustomerId());
-        self::assertNull($snapshot->getCustomerEmail());
-        self::assertTrue((bool) $snapshot->getCustomerIsGuest());
+        $this->assertNull($snapshot->getCustomerId());
+        $this->assertNull($snapshot->getCustomerEmail());
+        $this->assertTrue((bool) $snapshot->getCustomerIsGuest());
     }
 
     public function testTheSnapshotIsSavedInactiveSoItIsNeverPickedUpAsALiveCart(): void
     {
         $this->issuer()->issue();
 
-        self::assertFalse((bool) $this->savedQuotes[0]->getIsActive());
+        $this->assertFalse((bool) $this->savedQuotes[0]->getIsActive());
     }
 
     public function testAZeroLifetimeMeansTheLinkNeverExpires(): void
@@ -162,7 +162,7 @@ final class ShareLinkIssuerTest extends TestCase
 
         $this->issuer(lifetimeDays: 0, sharedCart: $shared)->issue();
 
-        self::assertNull($shared->getExpiresAt());
+        $this->assertNull($shared->getExpiresAt());
     }
 
     public function testANonZeroLifetimeSetsAnExpiry(): void
@@ -171,7 +171,7 @@ final class ShareLinkIssuerTest extends TestCase
 
         $this->issuer(lifetimeDays: 7, sharedCart: $shared)->issue();
 
-        self::assertNotNull($shared->getExpiresAt());
+        $this->assertNotNull($shared->getExpiresAt());
     }
 
     /**
@@ -183,8 +183,8 @@ final class ShareLinkIssuerTest extends TestCase
 
         $link = $this->issuer(sharedCart: $shared)->issue();
 
-        self::assertSame('hash-of-' . $link->token, $shared->getTokenHash());
-        self::assertNotSame($link->token, $shared->getTokenHash());
+        $this->assertSame('hash-of-' . $link->token, $shared->getTokenHash());
+        $this->assertNotSame($link->token, $shared->getTokenHash());
     }
 
     private function issuer(

@@ -26,7 +26,7 @@ class ExpressButtonPoolTest extends TestCase
     {
         $pool = new ExpressButtonPool($this->createMock(LoggerInterface::class));
 
-        self::assertSame([], $pool->getAvailable());
+        $this->assertSame([], $pool->getAvailable());
     }
 
     public function testReturnsAvailableButtonsInSortOrder(): void
@@ -42,7 +42,7 @@ class ExpressButtonPoolTest extends TestCase
             $pool->getAvailable()
         );
 
-        self::assertSame(['early', 'middle', 'late'], $codes);
+        $this->assertSame(['early', 'middle', 'late'], $codes);
     }
 
     public function testUnavailableButtonsAreOmitted(): void
@@ -52,7 +52,7 @@ class ExpressButtonPoolTest extends TestCase
             'off' => $this->button('off', false),
         ]);
 
-        self::assertCount(1, $pool->getAvailable());
+        $this->assertCount(1, $pool->getAvailable());
     }
 
     /**
@@ -66,11 +66,11 @@ class ExpressButtonPoolTest extends TestCase
         $broken->method('isAvailable')->willThrowException(new RuntimeException('boom'));
 
         $logger = $this->createMock(LoggerInterface::class);
-        $logger->expects(self::once())->method('warning');
+        $logger->expects($this->once())->method('warning');
 
         $pool = new ExpressButtonPool($logger, ['broken' => $broken, 'ok' => $this->button('ok', true, 20)]);
 
-        self::assertCount(1, $pool->getAvailable());
+        $this->assertCount(1, $pool->getAvailable());
     }
 
     public function testRejectsANonButtonAtConstructionRatherThanAtRenderTime(): void

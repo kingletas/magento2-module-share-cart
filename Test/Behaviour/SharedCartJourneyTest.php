@@ -36,7 +36,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * Alice shares her cart, and Bob opens the link.
  */
-final class SharedCartJourneyTest extends TestCase
+class SharedCartJourneyTest extends TestCase
 {
     private const SECTION = 'commerce_sharecart';
     private const NOW = '2026-08-27 09:00:00';
@@ -77,14 +77,14 @@ final class SharedCartJourneyTest extends TestCase
     {
         $link = $this->aliceSharesACartOf(3);
 
-        self::assertTrue($link->isSuccess);
-        self::assertNotNull($link->token);
-        self::assertStringContainsString((string) $link->token, (string) $link->url);
+        $this->assertTrue($link->isSuccess);
+        $this->assertNotNull($link->token);
+        $this->assertStringContainsString((string) $link->token, (string) $link->url);
 
         $result = $this->bobOpens((string) $link->token, withItemsOfHisOwn: 2);
 
-        self::assertSame(RestoreOutcome::Restored, $result->outcome);
-        self::assertNotNull($this->replacedSessionQuote, "Bob's session should hold the merged cart.");
+        $this->assertSame(RestoreOutcome::Restored, $result->outcome);
+        $this->assertNotNull($this->replacedSessionQuote, "Bob's session should hold the merged cart.");
     }
 
     /**
@@ -98,8 +98,8 @@ final class SharedCartJourneyTest extends TestCase
         $this->bobOpens((string) $link->token, withItemsOfHisOwn: 2);
 
         $merged = $this->replacedSessionQuote;
-        self::assertInstanceOf(SnapshotQuote::class, $merged);
-        self::assertCount(
+        $this->assertInstanceOf(SnapshotQuote::class, $merged);
+        $this->assertCount(
             2,
             $merged->merged,
             "Bob's existing quote and Alice's snapshot should both have been merged in."
@@ -117,8 +117,8 @@ final class SharedCartJourneyTest extends TestCase
         $this->bobOpens((string) $link->token, withItemsOfHisOwn: 0);
 
         $merged = $this->replacedSessionQuote;
-        self::assertInstanceOf(SnapshotQuote::class, $merged);
-        self::assertCount(1, $merged->merged);
+        $this->assertInstanceOf(SnapshotQuote::class, $merged);
+        $this->assertCount(1, $merged->merged);
     }
 
     /**
@@ -130,8 +130,8 @@ final class SharedCartJourneyTest extends TestCase
         $link = $this->aliceSharesACartOf(3);
         $row = $this->sharedCarts->getByToken((string) $link->token);
 
-        self::assertNotSame($link->token, $row->getTokenHash());
-        self::assertSame($this->tokens->hash((string) $link->token), $row->getTokenHash());
+        $this->assertNotSame($link->token, $row->getTokenHash());
+        $this->assertSame($this->tokens->hash((string) $link->token), $row->getTokenHash());
     }
 
     /**
@@ -147,9 +147,9 @@ final class SharedCartJourneyTest extends TestCase
         $this->sharedCarts->setNow('2026-09-04 09:00:00');
         $expired = $this->bobOpens((string) $link->token, withItemsOfHisOwn: 0);
 
-        self::assertSame(RestoreOutcome::NotFound, $unknown->outcome);
-        self::assertSame(RestoreOutcome::NotFound, $expired->outcome);
-        self::assertSame((string) $unknown->message, (string) $expired->message);
+        $this->assertSame(RestoreOutcome::NotFound, $unknown->outcome);
+        $this->assertSame(RestoreOutcome::NotFound, $expired->outcome);
+        $this->assertSame((string) $unknown->message, (string) $expired->message);
     }
 
     /**
@@ -163,7 +163,7 @@ final class SharedCartJourneyTest extends TestCase
         $this->currentStoreId = 2;
         $result = $this->bobOpens((string) $link->token, withItemsOfHisOwn: 0);
 
-        self::assertSame(RestoreOutcome::WrongStore, $result->outcome);
+        $this->assertSame(RestoreOutcome::WrongStore, $result->outcome);
     }
 
     /**
@@ -175,10 +175,10 @@ final class SharedCartJourneyTest extends TestCase
 
         $snapshot = $this->quotes[$this->nextQuoteId - 1];
 
-        self::assertNull($snapshot->getCustomerId());
-        self::assertNull($snapshot->getCustomerEmail());
-        self::assertTrue((bool) $snapshot->getCustomerIsGuest());
-        self::assertFalse((bool) $snapshot->getIsActive(), 'A snapshot must never be a live cart.');
+        $this->assertNull($snapshot->getCustomerId());
+        $this->assertNull($snapshot->getCustomerEmail());
+        $this->assertTrue((bool) $snapshot->getCustomerIsGuest());
+        $this->assertFalse((bool) $snapshot->getIsActive(), 'A snapshot must never be a live cart.');
     }
 
     /**
@@ -189,9 +189,9 @@ final class SharedCartJourneyTest extends TestCase
     {
         $link = $this->aliceSharesACartOf(0);
 
-        self::assertFalse($link->isSuccess);
-        self::assertSame('There is nothing in your cart to share.', (string) $link->message);
-        self::assertSame([], $this->logger->errors);
+        $this->assertFalse($link->isSuccess);
+        $this->assertSame('There is nothing in your cart to share.', (string) $link->message);
+        $this->assertSame([], $this->logger->errors);
     }
 
     public function testTheNightlyCleanupRemovesExpiredLinksAndLeavesLiveOnes(): void
@@ -202,17 +202,17 @@ final class SharedCartJourneyTest extends TestCase
         $this->settings[self::SECTION . '/general/lifetime_days'] = '0';
         $permanent = $this->aliceSharesACartOf(2);
 
-        self::assertSame(2, $this->sharedCarts->count());
+        $this->assertSame(2, $this->sharedCarts->count());
 
         $this->sharedCarts->setNow('2026-09-04 09:00:00');
         $this->cron()->execute();
 
-        self::assertSame(1, $this->sharedCarts->count());
-        self::assertSame(
+        $this->assertSame(1, $this->sharedCarts->count());
+        $this->assertSame(
             RestoreOutcome::NotFound,
             $this->bobOpens((string) $expiring->token, withItemsOfHisOwn: 0)->outcome
         );
-        self::assertSame(
+        $this->assertSame(
             RestoreOutcome::Restored,
             $this->bobOpens((string) $permanent->token, withItemsOfHisOwn: 0)->outcome
         );
@@ -230,8 +230,8 @@ final class SharedCartJourneyTest extends TestCase
         $this->sharedCarts->setNow('2026-09-04 09:00:00');
         $this->cron()->execute();
 
-        self::assertSame(1, $this->sharedCarts->count());
-        self::assertSame([], $this->sharedCarts->purged);
+        $this->assertSame(1, $this->sharedCarts->count());
+        $this->assertSame([], $this->sharedCarts->purged);
     }
 
     private function aliceSharesACartOf(int $items): \Commerce\ShareCart\Model\ShareLink

@@ -47,11 +47,11 @@ class SharedCartTest extends TestCase
         $resource = (new ReflectionClass(SharedCart::class))->newInstanceWithoutConstructor();
         (new ReflectionMethod($resource, '_construct'))->invoke($resource);
 
-        self::assertSame(
+        $this->assertSame(
             SharedCart::TABLE_NAME,
             (new \ReflectionProperty(SharedCart::class, '_mainTable'))->getValue($resource)
         );
-        self::assertSame(SharedCartInterface::SHARED_CART_ID, $resource->getIdFieldName());
+        $this->assertSame(SharedCartInterface::SHARED_CART_ID, $resource->getIdFieldName());
     }
 
     /**
@@ -61,15 +61,15 @@ class SharedCartTest extends TestCase
     {
         $this->resource()->deleteExpired('2026-08-26 12:00:00');
 
-        self::assertCount(1, $this->deletes);
-        self::assertSame(SharedCart::TABLE_NAME, $this->deletes[0]['table']);
+        $this->assertCount(1, $this->deletes);
+        $this->assertSame(SharedCart::TABLE_NAME, $this->deletes[0]['table']);
     }
 
     public function testTheCutoffIsBoundRatherThanInterpolated(): void
     {
         $this->resource()->deleteExpired('2026-08-26 12:00:00');
 
-        self::assertSame('2026-08-26 12:00:00', $this->deletes[0]['where']['expires_at < ?']);
+        $this->assertSame('2026-08-26 12:00:00', $this->deletes[0]['where']['expires_at < ?']);
     }
 
     /**
@@ -79,12 +79,12 @@ class SharedCartTest extends TestCase
     {
         $this->resource()->deleteExpired('2026-08-26 12:00:00');
 
-        self::assertContains('expires_at IS NOT NULL', $this->deletes[0]['where']);
+        $this->assertContains('expires_at IS NOT NULL', $this->deletes[0]['where']);
     }
 
     public function testTheNumberOfRemovedRowsIsReturnedAsAnInteger(): void
     {
-        self::assertSame(3, $this->resource()->deleteExpired('2026-08-26 12:00:00'));
+        $this->assertSame(3, $this->resource()->deleteExpired('2026-08-26 12:00:00'));
     }
 
     /**

@@ -32,7 +32,7 @@ class PurgeExpiredSharedCartsTest extends TestCase
 
     public function testTheSweepRunsWhenCleanupIsEnabled(): void
     {
-        $this->repository->expects(self::once())->method('purgeExpired')->willReturn(4);
+        $this->repository->expects($this->once())->method('purgeExpired')->willReturn(4);
 
         $this->cron(true)->execute();
     }
@@ -42,7 +42,7 @@ class PurgeExpiredSharedCartsTest extends TestCase
      */
     public function testNothingIsRemovedWhenCleanupIsDisabled(): void
     {
-        $this->repository->expects(self::never())->method('purgeExpired');
+        $this->repository->expects($this->never())->method('purgeExpired');
 
         $this->cron(false)->execute();
     }
@@ -57,8 +57,8 @@ class PurgeExpiredSharedCartsTest extends TestCase
 
         $this->cron(true)->execute();
 
-        self::assertCount(1, $this->logger->infos);
-        self::assertStringContainsString('4', $this->logger->infos[0]['message']);
+        $this->assertCount(1, $this->logger->infos);
+        $this->assertStringContainsString('4', $this->logger->infos[0]['message']);
     }
 
     /**
@@ -70,7 +70,7 @@ class PurgeExpiredSharedCartsTest extends TestCase
 
         $this->cron(true)->execute();
 
-        self::assertSame([], $this->logger->infos);
+        $this->assertSame([], $this->logger->infos);
     }
 
     /**
@@ -82,9 +82,9 @@ class PurgeExpiredSharedCartsTest extends TestCase
 
         $this->cron(true)->execute();
 
-        self::assertCount(1, $this->logger->errors);
-        self::assertStringContainsString('cleanup failed', $this->logger->errors[0]['message']);
-        self::assertSame([], $this->logger->infos);
+        $this->assertCount(1, $this->logger->errors);
+        $this->assertStringContainsString('cleanup failed', $this->logger->errors[0]['message']);
+        $this->assertSame([], $this->logger->infos);
     }
 
     private function cron(bool $cleanupEnabled): PurgeExpiredSharedCarts

@@ -31,27 +31,27 @@ class BlockExpressButtonTest extends TestCase
     {
         $button = $this->button(['code' => 'paypal', 'sortOrder' => 10]);
 
-        self::assertInstanceOf(ExpressButtonInterface::class, $button);
-        self::assertSame('paypal', $button->getCode());
-        self::assertSame(10, $button->getSortOrder());
+        $this->assertInstanceOf(ExpressButtonInterface::class, $button);
+        $this->assertSame('paypal', $button->getCode());
+        $this->assertSame(10, $button->getSortOrder());
     }
 
     public function testTheConfiguredBlockIsRendered(): void
     {
         $block = $this->createMock(BlockInterface::class);
         $block->method('toHtml')->willReturn('<button>Pay</button>');
-        $this->layout->expects(self::once())
+        $this->layout->expects($this->once())
             ->method('createBlock')
             ->with(Template::class)
             ->willReturn($block);
 
-        self::assertSame('<button>Pay</button>', $this->button()->render());
+        $this->assertSame('<button>Pay</button>', $this->button()->render());
     }
 
     public function testTheConfiguredTemplateIsAppliedToTheBlock(): void
     {
         $block = $this->createMock(Template::class);
-        $block->expects(self::once())->method('setTemplate')->with('Acme_Pay::button.phtml');
+        $block->expects($this->once())->method('setTemplate')->with('Acme_Pay::button.phtml');
         $block->method('toHtml')->willReturn('');
         $this->layout->method('createBlock')->willReturn($block);
 
@@ -65,7 +65,7 @@ class BlockExpressButtonTest extends TestCase
     public function testNoTemplateIsSetWhenNoneIsConfigured(): void
     {
         $block = $this->createMock(Template::class);
-        $block->expects(self::never())->method('setTemplate');
+        $block->expects($this->never())->method('setTemplate');
         $block->method('toHtml')->willReturn('');
         $this->layout->method('createBlock')->willReturn($block);
 
@@ -81,14 +81,14 @@ class BlockExpressButtonTest extends TestCase
         $block->method('toHtml')->willReturn('<button>Pay</button>');
         $this->layout->method('createBlock')->willReturn($block);
 
-        self::assertSame('<button>Pay</button>', $this->button(['template' => 'x.phtml'])->render());
+        $this->assertSame('<button>Pay</button>', $this->button(['template' => 'x.phtml'])->render());
     }
 
     public function testAConfiguredAndInstalledBlockIsAvailable(): void
     {
         $this->layout->method('createBlock')->willReturn($this->createMock(BlockInterface::class));
 
-        self::assertTrue($this->button()->isAvailable());
+        $this->assertTrue($this->button()->isAvailable());
     }
 
     /**
@@ -97,11 +97,11 @@ class BlockExpressButtonTest extends TestCase
      */
     public function testAnUninstalledPaymentBlockIsUnavailableRatherThanFatal(): void
     {
-        $this->layout->expects(self::never())->method('createBlock');
+        $this->layout->expects($this->never())->method('createBlock');
         $button = $this->button(['blockClass' => 'Acme\\Uninstalled\\Payment\\Block\\Button']);
 
-        self::assertFalse($button->isAvailable());
-        self::assertSame('', $button->render());
+        $this->assertFalse($button->isAvailable());
+        $this->assertSame('', $button->render());
     }
 
     /**
@@ -111,7 +111,7 @@ class BlockExpressButtonTest extends TestCase
     {
         $block = $this->createMock(BlockInterface::class);
         $block->method('toHtml')->willReturn('x');
-        $this->layout->expects(self::once())->method('createBlock')->willReturn($block);
+        $this->layout->expects($this->once())->method('createBlock')->willReturn($block);
 
         $button = $this->button();
         $button->isAvailable();
@@ -125,11 +125,11 @@ class BlockExpressButtonTest extends TestCase
      */
     public function testTheMissingBlockAnswerIsMemoisedToo(): void
     {
-        $this->layout->expects(self::never())->method('createBlock');
+        $this->layout->expects($this->never())->method('createBlock');
         $button = $this->button(['blockClass' => 'Acme\\Uninstalled\\Payment\\Block\\Button']);
 
-        self::assertFalse($button->isAvailable());
-        self::assertFalse($button->isAvailable());
+        $this->assertFalse($button->isAvailable());
+        $this->assertFalse($button->isAvailable());
     }
 
     /**
