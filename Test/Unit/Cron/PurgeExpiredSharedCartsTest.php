@@ -13,8 +13,8 @@ namespace Commerce\ShareCart\Test\Unit\Cron;
 use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Commerce\ShareCart\Cron\PurgeExpiredSharedCarts;
 use Commerce\ShareCart\Model\Config;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
 use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -90,10 +90,26 @@ class PurgeExpiredSharedCartsTest extends TestCase
     private function cron(bool $cleanupEnabled): PurgeExpiredSharedCarts
     {
         $config = new Config(
-            new ArrayScopeConfig(['test_sharecart/general/cleanup_enabled' => $cleanupEnabled ? '1' : '0']),
+            $this->scopeConfig(['test_sharecart/general/cleanup_enabled' => $cleanupEnabled ? '1' : '0']),
             'test_sharecart'
         );
 
         return new PurgeExpiredSharedCarts($this->repository, $config, $this->logger);
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }

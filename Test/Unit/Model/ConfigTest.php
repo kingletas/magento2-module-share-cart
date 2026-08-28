@@ -11,7 +11,7 @@ declare(strict_types=1);
 namespace Commerce\ShareCart\Test\Unit\Model;
 
 use Commerce\ShareCart\Model\Config;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use PHPUnit\Framework\TestCase;
 
 class ConfigTest extends TestCase
@@ -22,7 +22,7 @@ class ConfigTest extends TestCase
      */
     public function testEveryPathIsReadUnderTheConfiguredSection(): void
     {
-        $scopeConfig = new ArrayScopeConfig([
+        $scopeConfig = $this->scopeConfig([
             'acme_sharecart/general/enabled' => '1',
             'acme_sharecart/general/lifetime_days' => '7',
             'acme_sharecart/general/cleanup_enabled' => '1',
@@ -91,7 +91,7 @@ class ConfigTest extends TestCase
 
     public function testTheStoreIdIsPassedThroughToTheScopeLookup(): void
     {
-        $scopeConfig = new ArrayScopeConfig(['test_sharecart/general/lifetime_days' => '3']);
+        $scopeConfig = $this->scopeConfig(['test_sharecart/general/lifetime_days' => '3']);
 
         $this->assertSame(3, (new Config($scopeConfig, 'test_sharecart'))->getLifetimeDays(2));
     }
@@ -107,6 +107,22 @@ class ConfigTest extends TestCase
             $qualified['test_sharecart/' . $path] = $value;
         }
 
-        return new Config(new ArrayScopeConfig($qualified), 'test_sharecart');
+        return new Config($this->scopeConfig($qualified), 'test_sharecart');
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }

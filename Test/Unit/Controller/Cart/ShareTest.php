@@ -16,7 +16,7 @@ use Commerce\ShareCart\Model\Cart\RestoreResult;
 use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\Validator\TokenFormatValidator;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Redirect;
@@ -177,7 +177,7 @@ class ShareTest extends TestCase
         );
 
         $config = new Config(
-            new ArrayScopeConfig(['test_sharecart/general/enabled' => $enabled ? '1' : '0']),
+            $this->scopeConfig(['test_sharecart/general/enabled' => $enabled ? '1' : '0']),
             'test_sharecart'
         );
 
@@ -204,5 +204,21 @@ class ShareTest extends TestCase
         $factory->method('create')->willReturn($redirect);
 
         return $factory;
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }

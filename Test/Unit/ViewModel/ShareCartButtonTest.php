@@ -13,14 +13,14 @@ namespace Commerce\ShareCart\Test\Unit\ViewModel;
 use Commerce\ShareCart\Api\Checkout\ExpressButtonInterface;
 use Commerce\ShareCart\Model\Checkout\ExpressButtonPool;
 use Commerce\ShareCart\Model\Config;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\ViewModel\ShareCartButton;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 class ShareCartButtonTest extends TestCase
 {
@@ -77,7 +77,7 @@ class ShareCartButtonTest extends TestCase
         $unavailable = $this->createMock(ExpressButtonInterface::class);
         $unavailable->method('isAvailable')->willReturn(false);
 
-        $pool = new ExpressButtonPool(new RecordingLogger(), ['a' => $available, 'b' => $unavailable]);
+        $pool = new ExpressButtonPool($this->createMock(LoggerInterface::class), ['a' => $available, 'b' => $unavailable]);
 
         $this->assertSame([$available], $this->viewModel(pool: $pool)->getExpressButtons());
     }
@@ -94,15 +94,31 @@ class ShareCartButtonTest extends TestCase
     private function viewModel(bool $enabled = true, ?ExpressButtonPool $pool = null): ShareCartButton
     {
         $config = new Config(
-            new ArrayScopeConfig(['test_sharecart/general/enabled' => $enabled ? '1' : '0']),
+            $this->scopeConfig(['test_sharecart/general/enabled' => $enabled ? '1' : '0']),
             'test_sharecart'
         );
 
         return new ShareCartButton(
             $this->urlBuilder,
             new Json(),
-            $pool ?? new ExpressButtonPool(new RecordingLogger()),
+            $pool ?? new ExpressButtonPool($this->createMock(LoggerInterface::class)),
             $config
         );
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }

@@ -18,9 +18,8 @@ use Commerce\ShareCart\Controller\Cart\Share;
 use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\Validator\TokenFormatValidator;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
-use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Redirect;
@@ -34,6 +33,7 @@ use Magento\Quote\Api\Data\CartInterfaceFactory;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\StoreManagerInterface;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 
 /**
  * What a stranger with a URL costs.
@@ -152,7 +152,7 @@ class EnumerationCostTest extends TestCase
             $this->createMock(MessageManagerInterface::class),
             $this->restorer(),
             new TokenFormatValidator(),
-            new Config(new ArrayScopeConfig($settings), self::SECTION)
+            new Config($this->scopeConfig($settings), self::SECTION)
         );
     }
 
@@ -195,7 +195,23 @@ class EnumerationCostTest extends TestCase
             $this->createMock(CartRepositoryInterface::class),
             $sharedCarts,
             $storeManager,
-            new RecordingLogger()
+            $this->createMock(LoggerInterface::class)
         );
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }

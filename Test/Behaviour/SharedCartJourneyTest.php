@@ -19,10 +19,10 @@ use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\ShareLinkIssuer;
 use Commerce\ShareCart\Test\Behaviour\Fake\InMemorySharedCartRepository;
-use Commerce\ShareCart\Test\Unit\Fake\ArrayScopeConfig;
 use Commerce\ShareCart\Test\Unit\Fake\InMemorySharedCart;
 use Commerce\ShareCart\Test\Unit\Fake\RecordingLogger;
 use Commerce\ShareCart\Test\Unit\Fake\SnapshotQuote;
+use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\DataObject;
 use Magento\Framework\Stdlib\DateTime\DateTime;
@@ -274,7 +274,7 @@ class SharedCartJourneyTest extends TestCase
             $this->tokens,
             $urlBuilder,
             $dateTime,
-            new Config(new ArrayScopeConfig($this->settings), self::SECTION),
+            new Config($this->scopeConfig($this->settings), self::SECTION),
             $this->logger
         );
     }
@@ -295,7 +295,7 @@ class SharedCartJourneyTest extends TestCase
     {
         return new PurgeExpiredSharedCarts(
             $this->sharedCarts,
-            new Config(new ArrayScopeConfig($this->settings), self::SECTION),
+            new Config($this->scopeConfig($this->settings), self::SECTION),
             $this->logger
         );
     }
@@ -367,5 +367,21 @@ class SharedCartJourneyTest extends TestCase
         $quote->setCustomerEmail($email);
 
         return $quote;
+    }
+
+    /**
+     * @param array<string, mixed> $values
+     */
+    private function scopeConfig(array $values): ScopeConfigInterface
+    {
+        $scopeConfig = $this->createMock(ScopeConfigInterface::class);
+        $scopeConfig->method('getValue')->willReturnCallback(
+            static fn (string $path): mixed => $values[$path] ?? null
+        );
+        $scopeConfig->method('isSetFlag')->willReturnCallback(
+            static fn (string $path): bool => !in_array($values[$path] ?? null, [null, '', '0', 0, false], true)
+        );
+
+        return $scopeConfig;
     }
 }
