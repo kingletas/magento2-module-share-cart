@@ -32,8 +32,8 @@ use Psr\Log\LoggerInterface;
 use RuntimeException;
 
 /**
- * Three behaviours, each of them a production incident in waiting if it goes
- * the other way.
+ * Token allocation is bounded, the shopper sees a fixed sentence, and the
+ * internal reason reaches the log instead.
  */
 class ShareLinkIssuerTest extends TestCase
 {
