@@ -20,9 +20,14 @@ parameters:
     ignoreErrors:
         # __() returns a Phrase, and Magento's own controllers hand one to this
         # API; the parameter is documented as string and never was.
-        - '#of method Magento\\Framework\\Message\\ManagerInterface::add\w+Message\(\) expects string, Magento\\Framework\\Phrase given#'
+        -
+            message: '#of method Magento\\Framework\\Message\\ManagerInterface::add\w+Message\(\) expects string, Magento\\Framework\\Phrase given#'
+            # The framework's docblock varies across the versions this package supports.
+            reportUnmatched: false
         # A snapshot deliberately carries no customer; Magento's setters are
         # documented as if a field could only ever be set, never cleared.
         -
             message: '#of method Magento\\Quote\\Model\\Quote::setCustomer(Id|Email)\(\) expects (int|string), null given#'
             path: Model/ShareLinkIssuer.php
+            # The framework's docblock varies across the versions this package supports.
+            reportUnmatched: false

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Commerce\ShareCart\Controller\Cart;
 
+use Commerce\ShareCart\Model\Cart\RestoreResult;
 use Commerce\ShareCart\Model\Cart\SharedCartRestorer;
 use Commerce\ShareCart\Model\Config;
 use Commerce\ShareCart\Model\Validator\TokenFormatValidator;
@@ -53,14 +54,23 @@ class Share implements HttpGetActionInterface
 
         $result = $this->restorer->restore($token);
 
-        if ($result->isSuccess()) {
-            $this->messageManager->addSuccessMessage(__('The shared cart has been added to your cart.'));
-        } else {
-            $this->messageManager->addErrorMessage(
-                $result->message ?? __('We could not open that shared cart. Please try again.')
-            );
-        }
+        $this->report($result);
 
         return $redirect->setPath('checkout/cart');
+    }
+
+    private function report(RestoreResult $result): void
+    {
+        if ($result->isSuccess()) {
+            $this->messageManager->addSuccessMessage(__('The shared cart has been added to your cart.'));
+
+            return;
+        }
+
+        // A failed outcome always carries a message; a new one that forgot would
+        // otherwise show an empty error.
+        $this->messageManager->addErrorMessage(
+            $result->message ?? __('We could not open that shared cart. Please try again.')
+        );
     }
 }
