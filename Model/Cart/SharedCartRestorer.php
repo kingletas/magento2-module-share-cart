@@ -12,6 +12,7 @@ namespace Commerce\ShareCart\Model\Cart;
 use Commerce\ShareCart\Api\Data\SharedCartInterface;
 use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Magento\Checkout\Model\Session as CheckoutSession;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterfaceFactory;
@@ -80,6 +81,12 @@ class SharedCartRestorer
     private function merge(SharedCartInterface $sharedCart): Quote
     {
         $sourceQuote = $this->cartRepository->get($sharedCart->getQuoteId());
+
+        // merge() is the concrete Quote's; the caller turns this into a
+        // failed restore rather than a half-done one.
+        if (!$sourceQuote instanceof Quote) {
+            throw new LocalizedException(__('The shared cart is not a quote that can be merged.'));
+        }
 
         /** @var Quote $targetQuote */
         $targetQuote = $this->cartFactory->create();

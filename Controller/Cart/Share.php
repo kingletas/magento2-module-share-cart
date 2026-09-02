@@ -56,7 +56,9 @@ class Share implements HttpGetActionInterface
         if ($result->isSuccess()) {
             $this->messageManager->addSuccessMessage(__('The shared cart has been added to your cart.'));
         } else {
-            $this->messageManager->addErrorMessage($result->message);
+            $this->messageManager->addErrorMessage(
+                $result->message ?? __('We could not open that shared cart. Please try again.')
+            );
         }
 
         return $redirect->setPath('checkout/cart');

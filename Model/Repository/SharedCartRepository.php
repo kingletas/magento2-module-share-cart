@@ -19,9 +19,11 @@ use Commerce\ShareCart\Api\SharedCartRepositoryInterface;
 use Commerce\ShareCart\Model\ResourceModel\SharedCart as SharedCartResource;
 use Commerce\ShareCart\Model\ResourceModel\SharedCart\CollectionFactory;
 use Magento\Framework\Api\SearchCriteriaInterface;
+use Exception;
 use Magento\Framework\Exception\CouldNotDeleteException;
 use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Model\AbstractModel;
 use Magento\Framework\Stdlib\DateTime\DateTime;
 use Throwable;
 
@@ -51,7 +53,7 @@ class SharedCartRepository implements SharedCartRepositoryInterface
     public function getById(int $sharedCartId): SharedCartInterface
     {
         $sharedCart = $this->sharedCartFactory->create();
-        $this->resource->load($sharedCart, $sharedCartId);
+        $this->resource->load($this->asModel($sharedCart), $sharedCartId);
 
         if ($sharedCart->getSharedCartId() === null) {
             throw NoSuchEntityException::singleField(SharedCartInterface::SHARED_CART_ID, $sharedCartId);
@@ -72,7 +74,7 @@ class SharedCartRepository implements SharedCartRepositoryInterface
         }
 
         $sharedCart = $this->sharedCartFactory->create();
-        $this->resource->load($sharedCart, $tokenHash, SharedCartInterface::TOKEN);
+        $this->resource->load($this->asModel($sharedCart), $tokenHash, SharedCartInterface::TOKEN);
 
         if ($sharedCart->getSharedCartId() === null) {
             // Deliberately vague, so the message cannot separate an unknown
@@ -93,7 +95,7 @@ class SharedCartRepository implements SharedCartRepositoryInterface
     public function getByQuoteId(int $quoteId): SharedCartInterface
     {
         $sharedCart = $this->sharedCartFactory->create();
-        $this->resource->load($sharedCart, $quoteId, SharedCartInterface::QUOTE_ID);
+        $this->resource->load($this->asModel($sharedCart), $quoteId, SharedCartInterface::QUOTE_ID);
 
         if ($sharedCart->getSharedCartId() === null) {
             throw NoSuchEntityException::singleField(SharedCartInterface::QUOTE_ID, $quoteId);
@@ -123,9 +125,12 @@ class SharedCartRepository implements SharedCartRepositoryInterface
     public function save(SharedCartInterface $sharedCart): SharedCartInterface
     {
         try {
-            $this->resource->save($sharedCart);
+            $this->resource->save($this->asModel($sharedCart));
         } catch (Throwable $e) {
-            throw new CouldNotSaveException(__('The shared cart could not be saved.'), $e);
+            throw new CouldNotSaveException(
+                __('The shared cart could not be saved.'),
+                $e instanceof Exception ? $e : null
+            );
         }
 
         return $sharedCart;
@@ -137,9 +142,12 @@ class SharedCartRepository implements SharedCartRepositoryInterface
     public function delete(SharedCartInterface $sharedCart): void
     {
         try {
-            $this->resource->delete($sharedCart);
+            $this->resource->delete($this->asModel($sharedCart));
         } catch (Throwable $e) {
-            throw new CouldNotDeleteException(__('The shared cart could not be deleted.'), $e);
+            throw new CouldNotDeleteException(
+                __('The shared cart could not be deleted.'),
+                $e instanceof Exception ? $e : null
+            );
         }
     }
 
@@ -165,5 +173,20 @@ class SharedCartRepository implements SharedCartRepositoryInterface
         $expiresAt = $sharedCart->getExpiresAt();
 
         return $expiresAt !== null && strtotime($expiresAt) < strtotime($this->dateTime->gmtDate());
+    }
+
+    /**
+     * The resource model persists Magento models; the interface is all the
+     * public API promises, so the two are reconciled here.
+     */
+    private function asModel(SharedCartInterface $sharedCart): AbstractModel
+    {
+        if (!$sharedCart instanceof AbstractModel) {
+            throw new CouldNotSaveException(
+                __('A shared cart has to be a Magento model before it can be stored.')
+            );
+        }
+
+        return $sharedCart;
     }
 }
