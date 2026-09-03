@@ -14,7 +14,7 @@ use Magento\Quote\Model\Quote;
 /**
  * The quote the issuer builds its snapshot into.
  *
- * @SuppressWarnings(PHPMD.MissingConstructor)
+ * @SuppressWarnings("PHPMD.MissingConstructor")
  */
 class SnapshotQuote extends Quote
 {

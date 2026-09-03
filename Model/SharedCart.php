@@ -16,7 +16,7 @@ use Magento\Framework\Model\AbstractModel;
 /**
  * Shared cart entity.
  *
- * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ * @SuppressWarnings("PHPMD.CamelCaseMethodName")
  */
 class SharedCart extends AbstractModel implements SharedCartInterface
 {
